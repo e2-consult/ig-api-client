@@ -1,0 +1,28 @@
+{
+    "name": "e2consult/ig-api-client",
+    "description": "An API Tool that allows you to easily communicate with IGs new API using Laravel.",
+    "keywords": ["laravel", "ig", "ig-api", "api"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Einar-Johan Hansen",
+            "email": "einar@e2consult.no",
+            "homepage": "https://e2consult.no"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "E2Consult\\IGApi\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": ["E2Consult\\IGApi\\ServiceProvider"]
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    }
+}
