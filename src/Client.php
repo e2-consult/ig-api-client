@@ -4,14 +4,14 @@ namespace E2Consult\IGApi;
 
 class Client
 {
-    use Traits\AccountsTrait,
-        Traits\PositionsTrait,
+    use Traits\AccountTrait,
+        Traits\DealingTrait,
+        Traits\HelpersTrait,
+        Traits\LoginTrait,
         Traits\MarketsTrait,
-        Traits\OrdersTrait,
         Traits\PricesTrait,
         Traits\StreamingTrait,
-        Traits\WatchlistsTrait,
-        Traits\HelpersTrait;
+        Traits\WatchlistsTrait;
 
     public $service;
 
@@ -25,9 +25,9 @@ class Client
      * @param   string      $url        Url to which the request is to be sent
      * @param   array       $version       Headers that is to be sent with the request
      */
-    public function sendGetRequest($url, $version = null)
+    public function sendGetRequest($url, $version = null, $params = null)
     {
-        return $this->sendRequest('GET', $url, $version);
+        return $this->sendRequest('GET', $url, $version, null, $params);
     }
 
     /**
@@ -69,7 +69,7 @@ class Client
         return $this->sendRequest('DELETE', $url, $version, $body);
     }
 
-    public function sendRequest($type = 'GET', $url = '/', $version = 1, $body = null, $retryOnError = true, int $i = 0)
+    public function sendRequest($type = 'GET', $url = '/', $version = 1, $body = null, $params = null)
     {
         $options = array_merge([
             'headers' => [
@@ -77,23 +77,20 @@ class Client
             ],
         ],
             $body ? ['body' => json_encode($body)] : [],
+            $params ? ['query' => $params] : [],
         );
 
         try {
-            return json_decode($this->service->request($type, $url, $options)->getBody()->getContents());
+            return json_decode(
+                $this->service
+                    ->request($type, '/gateway/deal/'.$url, $options)
+                    ->getBody()
+                    ->getContents()
+            );
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $response = $e->getResponse();
             $statuscode = $response->getStatusCode();
             $message = json_decode($response->getBody()->getContents());
-            dd($message);
-            // if ($retryOnError && $i < 3 && $statuscode === 401) {
-            //     $this->service = (new Authenticate($this->username, $this->password, $this->apiToken))->createClient();
-
-            //     return $this->sendRequest($type, $url, $headers, $body, $retryOnError, ++$i);
-            // }
-            // if ($retryOnError && $i < 3 && $statuscode === 400 && is_null($message)) {
-            //     return $this->sendRequest($type, $url, $headers, $body, $retryOnError, ++$i);
-            // }
 
             return (object) [
                 'status' => $statuscode,
